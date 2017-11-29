@@ -25,14 +25,13 @@ class PermitsController extends Controller
 
         $idUsuario = Auth::user()->id;
 
-        if($rolUsuario == 1){ //Admin
+        if ($rolUsuario == 1) { //Admin
             $descripcionAdmin = 'Como administrador, usted puede visualizar todos los permisos de los empleados.';
         } else {
             $descripcionAdmin = '';
         }
 
-        return view('vendor.voyager.permits.permits',compact('nombreUsuarioMayuscula','descripcionAdmin','idUsuario'));
-
+        return view('vendor.voyager.permits.permits', compact('nombreUsuarioMayuscula', 'descripcionAdmin', 'idUsuario'));
     }
 
     public function getPosts()
@@ -41,22 +40,15 @@ class PermitsController extends Controller
         $idUsuario = Auth::id(); //obtener id de usuario autenticado
         $rolUsuario = Auth::user()->role_id;
 
-        if($rolUsuario == 1) { //Admin
+        if ($rolUsuario == 1) { //Admin
 
-            $data = Datatables::of(DB::table('permit_users')
-                ->join('users', 'users.id', '=', 'permit_users.user_id')
-                ->join('permits', 'permits.id', '=', 'permit_users.permit_id')
-                ->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->get())->make(true);
-        } else{
+            $data = Datatables::of(DB::table('permit_users')->join('users', 'users.id', '=', 'permit_users.user_id')->join('permits', 'permits.id', '=', 'permit_users.permit_id')->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->get())->make(true);
+        } else {
 
-            $data = Datatables::of(DB::table('permit_users')
-                ->join('users', 'users.id', '=', 'permit_users.user_id')
-                ->join('permits', 'permits.id', '=', 'permit_users.permit_id')
-                ->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->where('permit_users.user_id','=', $idUsuario)->get())->make(true);
+            $data = Datatables::of(DB::table('permit_users')->join('users', 'users.id', '=', 'permit_users.user_id')->join('permits', 'permits.id', '=', 'permit_users.permit_id')->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->where('permit_users.user_id', '=', $idUsuario)->get())->make(true);
         }
 
         return $data;
-        
     }
 
     /**
@@ -72,7 +64,7 @@ class PermitsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -83,18 +75,18 @@ class PermitsController extends Controller
 
         $permitUser = PermitUser::create([
             'user_id' => Auth::user()->id,
-            'permit_id' => $idPermit
+            'permit_id' => $idPermit,
         ]);
 
         alert()->success('Permiso guardado')->confirmButton('OK');
 
-       return redirect('permits');
+        return redirect('permits');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -105,7 +97,7 @@ class PermitsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -116,8 +108,8 @@ class PermitsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -128,7 +120,7 @@ class PermitsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use DataTables;
 
-
 class SchedulesController extends Controller
 {
     /**
@@ -22,14 +21,13 @@ class SchedulesController extends Controller
 
         $rolUsuario = Auth::user()->role_id;
 
-        if($rolUsuario == 1){ //Admin
+        if ($rolUsuario == 1) { //Admin
             $descripcionAdmin = 'Se le muestran los horarios de los empleados, puesto que usted es administrador y tiene los permisos para visualizar todos los registros. ';
         } else {
             $descripcionAdmin = '';
         }
 
-        return view('vendor.voyager.schedules.browse',compact(['nombreUsuarioMayuscula'],['descripcionAdmin'],['rolUsuario']));
-
+        return view('vendor.voyager.schedules.browse', compact(['nombreUsuarioMayuscula'], ['descripcionAdmin'], ['rolUsuario']));
     }
 
     public function getPosts()
@@ -37,24 +35,15 @@ class SchedulesController extends Controller
         $idUsuario = Auth::id(); //obtener id de usuario autenticado
         $rolUsuario = Auth::user()->role_id;
 
-        if($rolUsuario == 1){ //Admin
+        if ($rolUsuario == 1) { //Admin
 
-            $data = Datatables::of(DB::table('schedule_users')
-                ->join('users', 'users.id', '=', 'schedule_users.user_id')
-                ->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')
-                ->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break','schedules.exit', 'schedules.end_break', 'schedules.extra_time')->get())->make(true);
-        } else{
+            $data = Datatables::of(DB::table('schedule_users')->join('users', 'users.id', '=', 'schedule_users.user_id')->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break', 'schedules.exit', 'schedules.end_break', 'schedules.extra_time')->get())->make(true);
+        } else {
 
-            $data = Datatables::of(DB::table('schedule_users')
-                ->join('users', 'users.id', '=', 'schedule_users.user_id')
-                ->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')
-                ->join('roles', 'roles.id', '=', 'users.role_id')
-                ->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break','schedules.exit', 'schedules.end_break', 'schedules.extra_time')->where('schedule_users.user_id','=',$idUsuario)
-                ->get())->make(true);
+            $data = Datatables::of(DB::table('schedule_users')->join('users', 'users.id', '=', 'schedule_users.user_id')->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')->join('roles', 'roles.id', '=', 'users.role_id')->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break', 'schedules.exit', 'schedules.end_break', 'schedules.extra_time')->where('schedule_users.user_id', '=', $idUsuario)->get())->make(true);
         }
 
         return $data;
-
     }
 
     /**
@@ -70,8 +59,8 @@ class SchedulesController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response 
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -81,7 +70,7 @@ class SchedulesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -92,7 +81,7 @@ class SchedulesController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -103,8 +92,8 @@ class SchedulesController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -115,7 +104,7 @@ class SchedulesController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
