@@ -53,8 +53,8 @@ class TimeClock extends Controller
         }
 
         $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)->update([
-                'break' => $checarInicioComida,
-            ]);
+            'break' => $checarInicioComida,
+        ]);
 
         return 1;
         //
@@ -94,8 +94,8 @@ class TimeClock extends Controller
             $claves1 = $claves[0];
 
             $insertarSalida = Schedule::where("id", '=', $idUltimoRegistro)->update([
-                    'exit' => Carbon::now('America/Mexico_City'),
-                ]);
+                'exit' => Carbon::now('America/Mexico_City'),
+            ]);
 
             if ($checadasUsuario['break'] == null) {
 
@@ -104,9 +104,9 @@ class TimeClock extends Controller
                 $checarHoraFinComida = $this->crearFechaCarbon($fechaActualClear[0], $fechaActualClear[1], $fechaActualClear[2], $horaDeComidaUsuarioClear[0], $horaDeComidaUsuarioClear[1], $horaDeComidaUsuarioClear[2])->addHours(1);
 
                 $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)->update([
-                        'break' => $checarHoraComida,
-                        'end_break' => $checarHoraFinComida,
-                    ]);
+                    'break' => $checarHoraComida,
+                    'end_break' => $checarHoraFinComida,
+                ]);
 
                 return 'guardado';
             }
