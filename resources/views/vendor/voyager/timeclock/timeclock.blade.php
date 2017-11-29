@@ -60,7 +60,7 @@ a.text:hover {
 {{ URL::asset('css/stylesweetAlert.css') }}
 @section('content')
 
-    <div class="col-lg-6">
+    <div class="col-lg-6" id="inicioReceso">
         <div class="container">
             <img src="{{ voyager_asset('images/widget-backgrounds/checarComida.jpg') }}" class="image" alt="Responsive image">
             <div class="overlay">
@@ -68,6 +68,16 @@ a.text:hover {
             </div>
         </div>
     </div>
+
+    <div class="col-lg-6" id="finReceso" style="display: none;">
+        <div class="container">
+            <img src="{{ voyager_asset('images/widget-backgrounds/checarRegresoComida.jpg') }}" class="image" alt="Responsive image">
+            <div class="overlay">
+                <a class="text" data-toggle="modal" href="#checarRegresoComida">Finalizar Receso</a>
+            </div>
+        </div>
+    </div>
+
     <div class="col-lg-6">
         <div class="container">
             <img src="{{ voyager_asset('images/widget-backgrounds/checarSalida.jpg') }}" class="image" alt="Responsive image">
@@ -99,6 +109,27 @@ a.text:hover {
             </b>
         </div>
     </div>
+
+<div class="modal fade" id="checarRegresoComida" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="exampleModalLabel">Estás a punto de registrar tu final de receso</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div align="center">
+            <h4 class="modal-title" id="exampleModalLabel">¿Estás seguro?</h4></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+        <button type="button" onclick="guardarRegresoComida()" class="btn btn-primary">Si</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="modal fade" id="checarComida" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -149,44 +180,35 @@ a.text:hover {
 function guardarComida()
 {
 
-var d = new Date();
-var año = d.getFullYear();
-var mes = d.getMonth()+1;
-var dia = d.getDate().toString();
-var hora = d.getHours();
-var minuto = d.getMinutes();
-var segundo = d.getSeconds();
-
-var fecha_actual= año + "-" + mes + "-" + dia;
-var hora_actual= hora + ":" + minuto + ":" + segundo;
 
    $.ajax({
                type:  'post',
                url:   '{{ route('checar_comida') }}',
-               data:  {fecha_actual:fecha_actual , hora_actual:hora_actual},
                success:  function (response) {
-
-                 alert(response);
 
                  //alert(response);
 
-              //  if(response == 'guardado'){
-              //    $('#checarSalida').modal('hide');
-              //    
-              //    swal({
-              //       title: "Que tengas un excelente día.",
-              //       text: "No olvides cerrar tu sesión",
-              //       type: "success",
-              //       timer: 2000
-              //       })
-              //  } if(response == false){ 
-              //    $('#checarSalida').modal('hide');
-              //    swal({
-              //      title: "Ya has registrado tu salida anteriormente",
-              //      timer: 2000
-              //      })
-  //
-              //  }
+                if(response == 1){
+                  $('#checarComida').modal('hide');
+                  
+                  swal({
+                     title: "Buen provecho",
+                     text: "No olvides registrar tu regreso.",
+                     type: "success",
+                     timer: 2000
+                     })
+
+                  $('#inicioReceso').hide();
+                  $('#finReceso').show();
+
+                } if(response == 0){ 
+                  $('#checarComida').modal('hide');
+                  swal({
+                    title: "Ya has registrado tu receso anteriormente",
+                    timer: 2000
+                    })
+  
+                }
                }
        });
 }
@@ -211,25 +233,25 @@ var hora_actual= hora + ":" + minuto + ":" + segundo;
                data:  {fecha_actual:fecha_actual , hora_actual:hora_actual},
                success:  function (response) {
 
-                 alert(response);
+                 //alert(response);
 
-              //if(response == 'guardado'){
-              //  $('#checarSalida').modal('hide');
-              //  
-              //  swal({
-              //     title: "Que tengas un excelente día.",
-              //     text: "No olvides cerrar tu sesión",
-              //     type: "success",
-              //     timer: 2000
-              //     })
-              //} if(response == false){ 
-              //  $('#checarSalida').modal('hide');
-              //  swal({
-              //    title: "Ya has registrado tu salida anteriormente",
-              //    timer: 2000
-              //    })
+              if(response == 'guardado'){
+                $('#checarSalida').modal('hide');
+                
+                swal({
+                   title: "Que tengas un excelente día.",
+                   text: "No olvides cerrar tu sesión",
+                   type: "success",
+                   timer: 2000
+                   })
+              } if(response == false){ 
+                $('#checarSalida').modal('hide');
+                swal({
+                  title: "Ya has registrado tu salida anteriormente",
+                  timer: 2000
+                  })
   
-              //}
+              }
                }
        });
 }

@@ -42,7 +42,25 @@ class TimeClock extends Controller
 
     public function guardarComida(Request $request)
     {
-        return 'hola';
+        $checarInicioComida = Carbon::now('America/Mexico_City');
+
+        $idUltimoRegistro = $this->ultimoRegistroScheduleUser();
+
+        $checadasUsuario = $this->ultimoRegistroSchedule();
+
+        if($checadasUsuario['break'] != NULL) {
+
+            return 0;
+
+        } 
+
+        $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)
+        ->update([
+                'break' => $checarInicioComida
+            ]);
+       
+       
+        return 1;
         //
     }
 
@@ -73,7 +91,7 @@ class TimeClock extends Controller
      //$prueba = $this->convertirFechaHoraCompletaEnArray();
 
 
-      //if($checadasUsuario['exit'] == NULL) {// //Si la última checada de la salida está vacia se podrá guardar la checada
+      if($checadasUsuario['exit'] == NULL) {// //Si la última checada de la salida está vacia se podrá guardar la checada
 
 
          $Extras = $SalidaUsuario->diffForHumans($horaDeSalidaUsuarioClear);
@@ -101,10 +119,10 @@ class TimeClock extends Controller
                   return 'guardado';
           }
 
-          var_dump($Extras);
-  //} 
+          return 'guardado';
+  } 
 
-       //return 0;
+       return 0;
 }
 
 
@@ -170,10 +188,13 @@ class TimeClock extends Controller
         
         $horasEstablecidasDeUsuario= Usuario::where("id", '=', $idUsuarioLogeado)->get();
         $horasEstablecidasDeUsuarioArray = $horasEstablecidasDeUsuario->toArray(); 
-        $horaDeComidaUsuario = $horasEstablecidasDeUsuarioArray[0]['hora_receso'];
-        $horaDeComidaUsuarioClear = explode(':' , $horaDeComidaUsuario); 
+        $horaDeComidaUsuario = $horasEstablecidasDeUsuario[0]['hora_receso'];
         
-        return $horaDeComidaUsuarioClear;
+        $arrEat = explode(' ', $horaDeComidaUsuario);
+        $arrEatOne = explode('-', $arrEat[0]);
+        $arrEatTwo = explode(':', $arrEat[1]);
+
+        return $arrEatTwo;
         
     }
 
@@ -189,9 +210,9 @@ class TimeClock extends Controller
         $array2 = explode('-' , $array1[0]);
         $array3 = explode(':' , $array1[1]);
 
-        $checarHoraComida = $this->crearFechaCarbon($array2[0], $array2[1], $array2[2], $array3[0], $array3[1], $array3[2]);
+        $checarHoraSalida = $this->crearFechaCarbon($array2[0], $array2[1], $array2[2], $array3[0], $array3[1], $array3[2]);
 
-        return $checarHoraComida;
+        return $checarHoraSalida;
         //
     }
 
