@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Permit;
 use DataTables;
-use App\User;
 use App\PermitUser;
 
 class PermitsController extends Controller
@@ -26,8 +25,7 @@ class PermitsController extends Controller
 
         $idUsuario = Auth::user()->id;
 
-        if($rolUsuario == 1) //Admin
-        {
+        if($rolUsuario == 1){ //Admin
             $descripcionAdmin = 'Como administrador, usted puede visualizar todos los permisos de los empleados.';
         } else {
             $descripcionAdmin = '';
@@ -37,32 +35,29 @@ class PermitsController extends Controller
 
     }
 
-    public function getPosts(){
-        
-                $id = Auth::user(); //buscar usuario autenticado
-                $idUsuario = Auth::id(); //obtener id de usuario autenticado
-                $rolUsuario = Auth::user()->role_id;
-        
-                if($rolUsuario == 1) //Admin
-                {
-                    $data = Datatables::of(DB::table('permit_users')
-                    ->join('users', 'users.id', '=', 'permit_users.user_id')
-                    ->join('permits', 'permits.id', '=', 'permit_users.permit_id')
-                    ->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->get())->make(true);
-                
-        
-                } else {
+    public function getPosts()
+    {
 
-                    $data = Datatables::of(DB::table('permit_users')
-                    ->join('users', 'users.id', '=', 'permit_users.user_id')
-                    ->join('permits', 'permits.id', '=', 'permit_users.permit_id')
-                    ->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->where('permit_users.user_id','=', $idUsuario)->get())->make(true);
+        $idUsuario = Auth::id(); //obtener id de usuario autenticado
+        $rolUsuario = Auth::user()->role_id;
+
+        if($rolUsuario == 1) { //Admin
+
+            $data = Datatables::of(DB::table('permit_users')
+                ->join('users', 'users.id', '=', 'permit_users.user_id')
+                ->join('permits', 'permits.id', '=', 'permit_users.permit_id')
+                ->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->get())->make(true);
+        } else{
+
+            $data = Datatables::of(DB::table('permit_users')
+                ->join('users', 'users.id', '=', 'permit_users.user_id')
+                ->join('permits', 'permits.id', '=', 'permit_users.permit_id')
+                ->select('users.name', 'users.role_id', 'permits.nombre', 'permits.created_at')->where('permit_users.user_id','=', $idUsuario)->get())->make(true);
+        }
+
+        return $data;
         
-                }
-        
-               return $data;
-        
-            }
+    }
 
     /**
      * Show the form for creating a new resource.
