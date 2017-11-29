@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Schedule;
 use DataTables;
-use App\User;
 
 
 class SchedulesController extends Controller
@@ -24,8 +22,7 @@ class SchedulesController extends Controller
 
         $rolUsuario = Auth::user()->role_id;
 
-        if($rolUsuario == 1) //Admin
-        {
+        if($rolUsuario == 1){ //Admin
             $descripcionAdmin = 'Se le muestran los horarios de los empleados, puesto que usted es administrador y tiene los permisos para visualizar todos los registros. ';
         } else {
             $descripcionAdmin = '';
@@ -35,31 +32,28 @@ class SchedulesController extends Controller
 
     }
 
-    public function getPosts(){
-
-        $id = Auth::user(); //buscar usuario autenticado
+    public function getPosts()
+    {
         $idUsuario = Auth::id(); //obtener id de usuario autenticado
         $rolUsuario = Auth::user()->role_id;
 
-        if($rolUsuario == 1) //Admin
-        {
-            $data = Datatables::of(DB::table('schedule_users')
-            ->join('users', 'users.id', '=', 'schedule_users.user_id')
-            ->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')
-            ->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break','schedules.exit', 'schedules.end_break', 'schedules.extra_time')->get())->make(true);
-
-        } else {
+        if($rolUsuario == 1){ //Admin
 
             $data = Datatables::of(DB::table('schedule_users')
-            ->join('users', 'users.id', '=', 'schedule_users.user_id')
-            ->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')
-            ->join('roles', 'roles.id', '=', 'users.role_id')
-            ->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break','schedules.exit', 'schedules.end_break', 'schedules.extra_time')->where('schedule_users.user_id','=',$idUsuario)
-            ->get())->make(true);
+                ->join('users', 'users.id', '=', 'schedule_users.user_id')
+                ->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')
+                ->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break','schedules.exit', 'schedules.end_break', 'schedules.extra_time')->get())->make(true);
+        } else{
 
+            $data = Datatables::of(DB::table('schedule_users')
+                ->join('users', 'users.id', '=', 'schedule_users.user_id')
+                ->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')
+                ->join('roles', 'roles.id', '=', 'users.role_id')
+                ->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break','schedules.exit', 'schedules.end_break', 'schedules.extra_time')->where('schedule_users.user_id','=',$idUsuario)
+                ->get())->make(true);
         }
 
-       return $data;
+        return $data;
 
     }
 
