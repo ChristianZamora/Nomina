@@ -213,6 +213,41 @@ function guardarComida()
        });
 }
 
+function guardarRegresoComida()
+{
+
+
+   $.ajax({
+               type:  'post',
+               url:   '{{ route('checar_regresoComida') }}',
+               success:  function (response) {
+
+                 //alert(response);
+
+                if(response == 1){
+                  $('#checarRegresoComida').modal('hide');
+                  
+                  swal({
+                     title: "Que hayas disfrutado de tus alimentos",
+                     type: "success",
+                     timer: 2000
+                     })
+                  $('#finReceso').hide();
+                  $('#inicioReceso').show();
+                  
+
+                } if(response == 0){ 
+                  $('#checarRegresoComida').modal('hide');
+                  swal({
+                    title: "Ya has registrado tu receso anteriormente",
+                    timer: 2000
+                    })
+  
+                }
+               }
+       });
+}
+
 function guardarSalida()
 {
 

@@ -64,6 +64,30 @@ class TimeClock extends Controller
         //
     }
 
+    public function guardarRegresoComida(Request $request)
+    {
+        $checarRegresoComida = Carbon::now('America/Mexico_City');
+
+        $idUltimoRegistro = $this->ultimoRegistroScheduleUser();
+
+        $checadasUsuario = $this->ultimoRegistroSchedule();
+
+        if($checadasUsuario['end_break'] != NULL) {
+
+            return 0;
+
+        } 
+
+        $insertarRegresoComida = Schedule::where("id", '=', $idUltimoRegistro)
+        ->update([
+                'end_break' => $checarRegresoComida
+            ]);
+       
+       
+        return 1;
+        //
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -88,42 +112,71 @@ class TimeClock extends Controller
 
      $idUltimoRegistro = $this->ultimoRegistroScheduleUser(); //Obtener último registro de la tabla ScheduleUser 
 
-     //$prueba = $this->convertirFechaHoraCompletaEnArray();
-
 
       if($checadasUsuario['exit'] == NULL) {// //Si la última checada de la salida está vacia se podrá guardar la checada
 
-
-         $Extras = $SalidaUsuario->diffForHumans($horaDeSalidaUsuarioClear);
-
-         $claves = explode(' ', $Extras);
-         $claves1 = $claves[0];
-           
           $insertarSalida = Schedule::where("id", '=', $idUltimoRegistro)
-          ->update([
+        ->update([
               'exit' => Carbon::now('America/Mexico_City')
               ]);
 
-          if($checadasUsuario['break'] == NULL) {
+          $Extras =$SalidaUsuario->diffInMinutes($horaDeSalidaUsuarioClear);
+          $diff =$SalidaUsuario->diffForHumans($horaDeSalidaUsuarioClear);
+     
+          $horasExtras = $this->toHours($Extras,'round');
+          $horas = explode(' ' , $diff);
+     
+              if($horas[2] === 'before'){
+     
+                 $insertarSalida = Schedule::where("id", '=', $idUltimoRegistro)
+                 ->update([
+                     'extra_time' => $horasExtras
+                     ]);
 
-           $checarHoraComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1],$fechaActualClear[2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1],$horaDeComidaUsuarioClear[2]);
+              }     
 
-           $checarHoraFinComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1],$fechaActualClear[2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1],$horaDeComidaUsuarioClear[2])->addHours(1);
+         if($checadasUsuario['break'] == NULL) {
 
-              $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)
-              ->update([
-                      'break' => $checarHoraComida,
-                      'end_break' => $checarHoraFinComida
-                  ]);
+          $checarHoraComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1],$fechaActualClear[2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1],$horaDeComidaUsuarioClear[2]);
 
-                  return 'guardado';
-          }
+          $checarHoraFinComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1],$fechaActualClear[2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1],$horaDeComidaUsuarioClear[2])->addHours(1);
 
-          return 'guardado';
+             $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)
+             ->update([
+                     'break' => $checarHoraComida,
+                     'end_break' => $checarHoraFinComida
+                 ]);
+
+                 return 'guardado';
+         }
+
+         return 'guardado'; 
   } 
 
        return 0;
 }
+
+    public function toHours($min,$type)
+        { 
+            
+            //obtener segundos
+            $sec = $min * 60;
+            //dias es la division de n segs entre 86400 segundos que representa un dia
+            $dias=floor($sec/86400);
+            //mod_hora es el sobrante, en horas, de la division de días; 
+            $mod_hora=$sec%86400;
+            //hora es la division entre el sobrante de horas y 3600 segundos que representa una hora;
+            $horas=floor($mod_hora/3600); 
+            //mod_minuto es el sobrante, en minutos, de la division de horas; 
+            $mod_minuto=$mod_hora%3600;
+            //minuto es la division entre el sobrante y 60 segundos que representa un minuto;
+            $minutos=floor($mod_minuto/60);
+
+            $text = $horas.' hrs'.' '.$minutos.' min';
+          
+            return $text; 
+
+    }
 
 
     public function convertirHorasEnArray($hora)
@@ -203,14 +256,16 @@ class TimeClock extends Controller
         $idUsuarioLogeado = $this->usuarioLogeado();
         
         $horasEstablecidasDeUsuario= Usuario::where("id", '=', $idUsuarioLogeado)->get();
-        //$horasEstablecidasDeUsuarioArray = $horasEstablecidasDeUsuario->toArray(); 
         $horaDeSalidaUsuario = $horasEstablecidasDeUsuario[0]['hora_salida'];
-
+        
+        $fechaActual = date("Y-m-d");
+        $fechaActualAno = explode('-' , $fechaActual);
+     
         $array1 = explode(' ' , $horaDeSalidaUsuario);
         $array2 = explode('-' , $array1[0]);
         $array3 = explode(':' , $array1[1]);
 
-        $checarHoraSalida = $this->crearFechaCarbon($array2[0], $array2[1], $array2[2], $array3[0], $array3[1], $array3[2]);
+        $checarHoraSalida = $this->crearFechaCarbon($fechaActualAno[0], $fechaActualAno[1], $fechaActualAno[2], $array3[0], $array3[1], $array3[2]);
 
         return $checarHoraSalida;
         //
