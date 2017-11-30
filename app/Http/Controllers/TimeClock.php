@@ -32,6 +32,22 @@ class TimeClock extends Controller
         //
     }
 
+    public function comprobarComida()
+    {
+
+        $ultimoRegistro = $this->ultimoRegistroSchedule();
+
+        $comida = $ultimoRegistro['break'];
+        $finComida = $ultimoRegistro['end_break'];
+
+        if($comida != NULL && $finComida === NULL){ //Cuando tiene registro de comida pero no de fin comida
+
+            return 1;
+
+        }
+
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -102,54 +118,126 @@ class TimeClock extends Controller
 
         $SalidaUsuario = $this->crearFechaCarbon($fechaActualClear[0], $fechaActualClear[1], $fechaActualClear[2], $horaActualClear[0], $horaActualClear[1], $horaActualClear[2]); // Checar salida con fecha y hora actual
 
+        $idUltimoRegistro = $this->ultimoRegistroScheduleUser();
+
         $horaDeComidaUsuarioClear = $this->horaDeComidaUsuario(); // Obtener hora de comida del usuario
 
         $horaDeSalidaUsuarioClear = $this->horaDeSalidaUsuario(); // Obtener hora de salida del usuario
 
-<<<<<<< HEAD
-=======
-        $idUltimoRegistro = $this->ultimoRegistroScheduleUser(); //Obtener último registro de la tabla ScheduleUser
+        $horaChecadaEntradaUsuario = $this->checadaEntradaUsuario();
 
-        //$prueba = $this->convertirFechaHoraCompletaEnArray();
->>>>>>> 07665353b4e065f135fcca55a62e6acdbfa7692f
+        $horaChecadaComidaUsuario = $this->checadaComidaUsuario();
 
-        if ($checadasUsuario['exit'] == null) {// //Si la última checada de la salida está vacia se podrá guardar la checada
+        $horaChecadaRegresoComidaUsuario = $this->checadaRegresoComidaUsuario();
 
-<<<<<<< HEAD
-          $insertarSalida = Schedule::where("id", '=', $idUltimoRegistro)
+        $recesoMinutos =$horaChecadaComidaUsuario->diffInMinutes($horaChecadaRegresoComidaUsuario);// Tiempo de receso del empleado 
+
+        if ($checadasUsuario['exit'] == null) {//// //Si la última checada de la salida está vacia se podrá guardar la checada
+
+        $tiempoExtra =$SalidaUsuario->diffInMinutes($horaDeSalidaUsuarioClear); //Diferencia en minutos entrela hora de salida establecida para el usuario y su hora de checada en salida 
+        
+        $difEntradaComida =$horaChecadaComidaUsuario->diffInMinutes($horaChecadaEntradaUsuario); //Diferenciaen minutos entre la hora de entrada  y su hora de checada en comida
+         
+        $difRegresoComidaSalida =$horaChecadaRegresoComidaUsuario->diffInMinutes($SalidaUsuario); //Diferenciaen  minutos entre la hora de regreso de comida  y su hora de checada en salida
+        $tiempo = $difEntradaComida + $difRegresoComidaSalida; //tiempo total laborado durante el día
+
+        $tiempoLaborado = $this->toHours($tiempo);
+        $horasExtras = $this->toHours($tiempoExtra);
+        $receso = $this->toHours($recesoMinutos);
+
+        $diff =$SalidaUsuario->diffForHumans($horaDeSalidaUsuarioClear); 
+        $horas = explode(' ' , $diff);
+
+        $insertarSalida = Schedule::where("id", '=', $idUltimoRegistro)
         ->update([
-              'exit' => Carbon::now('America/Mexico_City')
-              ]);
+           'exit' => Carbon::now('America/Mexico_City')
+           ]);
 
-          $Extras =$SalidaUsuario->diffInMinutes($horaDeSalidaUsuarioClear);
-          $diff =$SalidaUsuario->diffForHumans($horaDeSalidaUsuarioClear);
-     
-          $horasExtras = $this->toHours($Extras,'round');
-          $horas = explode(' ' , $diff);
-     
-              if($horas[2] === 'before'){
-     
+           if($horas[2] =! 'before') {    
                  $insertarSalida = Schedule::where("id", '=', $idUltimoRegistro)
                  ->update([
                      'extra_time' => $horasExtras
                      ]);
-
-              }     
-
+         }
+         
+        $insertarTiempoLaborado = Schedule::where("id", '=', $idUltimoRegistro)
+        ->update([
+                 'time_worked' => $tiempoLaborado,
+                 'time_break' => $receso
+             ]);
+             
+ 
+//**********************************SI EL REGISTRO DE COMIDA SE ENCUENTRA VACIO*********************************          
          if($checadasUsuario['break'] == NULL) {
 
-          $checarHoraComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1],$fechaActualClear[2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1],$horaDeComidaUsuarioClear[2]);
+            $checarHoraComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1],$fechaActualClear   [2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1],$horaDeComidaUsuarioClear[2]);
+            
+            $checarHoraFinComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1], $fechaActualClear[2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1], $horaDeComidaUsuarioClear[2])->addHours(1);
+            
+            $difEntradaComida =$horaChecadaComidaUsuario->diffInMinutes($horaChecadaEntradaUsuario); //Diferencia     en minutos entre la hora de entrada  y su hora de checada en comida
+            
+            $difRegresoComidaSalida =$horaChecadaRegresoComidaUsuario->diffInMinutes($SalidaUsuario); //Diferencia    en  minutos entre la hora de regreso de comida  y su hora de checada en salida
+ 
+              $insertarComidas = Schedule::where("id", '=', $idUltimoRegistro)
+               ->update([
+                       'break' => $checarHoraComida,
+                       'end_break' => $checarHoraFinComida
+                   ]);
 
-          $checarHoraFinComida = $this->crearFechaCarbon($fechaActualClear[0],$fechaActualClear[1],$fechaActualClear[2], $horaDeComidaUsuarioClear[0],$horaDeComidaUsuarioClear[1],$horaDeComidaUsuarioClear[2])->addHours(1);
+            $tiempoExtra =$SalidaUsuario->diffInMinutes($horaDeSalidaUsuarioClear); //Diferencia eminutos entre la hora de salida establecida para el usuario y su hora de checada en salida  
+            $recesoMinutos =$horaChecadaComidaUsuario->diffInMinutes($horaChecadaRegresoComidaUsuario); //Diferencia en  minutos de la comida   
+            $tiempo = $difEntradaComida + $difRegresoComidaSalida; //tiempo total laborado durante el día
 
-             $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)
-             ->update([
-                     'break' => $checarHoraComida,
-                     'end_break' => $checarHoraFinComida
-                 ]);
+            $tiempoLaborado = $this->toHours($tiempo);
+            $horasExtras = $this->toHours($tiempoExtra);   
+            $receso = $this->toHours($recesoMinutos); //Minutos de receso convertidos a horas    
 
-                 return 'guardado';
+              $insertarDatosExtras = Schedule::where("id", '=', $idUltimoRegistro)
+                ->update([
+                        'time_worked' => $tiempoLaborado,
+                        'extra_time' => $horasExtras,
+                        'time_break' => $receso,
+                    ]);     
+
+                   return 'guardado';
          }
+
+
+//*********************************SI EL REGISTRO DE finCOMIDA SE ENCUENTRA VACIO*******************************          
+         if($checadasUsuario['break'] != NULL && $checadasUsuario['end_break'] == NULL) {
+
+            $checarHoraComidaMasUno = $this->checadaComidaUsuario()->addHours(1);
+
+            $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)
+            ->update([
+                    'end_break' => $checarHoraComidaMasUno
+                ]);
+            
+            $difEntradaComida =$horaChecadaComidaUsuario->diffInMinutes($horaChecadaEntradaUsuario); //Diferencia en minutos entre la hora de entrada  y su hora de checada en comida
+            
+            $difRegresoComidaSalida =$horaChecadaRegresoComidaUsuario->diffInMinutes($SalidaUsuario); //Diferencia en  minutos entre la hora de regreso de comida  y su hora de checada en salida
+
+            $recesoMinutos =$horaChecadaComidaUsuario->diffInMinutes($horaChecadaRegresoComidaUsuario); //Diferencia en  minutos de la comida
+
+            $tiempoExtra =$SalidaUsuario->diffInMinutes($horaDeSalidaUsuarioClear); //Diferencia en minutos entre la hora de salida establecida para el usuario y su hora de checada en salida
+
+            $tiempo = $difEntradaComida + $difRegresoComidaSalida; //tiempo total laborado durante el día
+
+            $receso = $this->toHours($recesoMinutos); //Minutos de receso convertidos a horas
+            $tiempoLaborado = $this->toHours($tiempo);
+            $horasExtras = $this->toHours($tiempoExtra);
+            
+              $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)
+               ->update([
+                       'time_worked' => $tiempoLaborado,
+                       'time_break' => $receso,
+                       'extra_time' => $horasExtras
+
+                   ]);
+            
+                   return 'guardado';
+         }
+
 
          return 'guardado'; 
   } 
@@ -157,7 +245,7 @@ class TimeClock extends Controller
        return 0;
 }
 
-    public function toHours($min,$type)
+    public function toHours($min)
         { 
             
             //obtener segundos
@@ -179,36 +267,6 @@ class TimeClock extends Controller
 
     }
 
-=======
-            $Extras = $SalidaUsuario->diffForHumans($horaDeSalidaUsuarioClear);
-
-            $claves = explode(' ', $Extras);
-            $claves1 = $claves[0];
-
-            $insertarSalida = Schedule::where("id", '=', $idUltimoRegistro)->update([
-                'exit' => Carbon::now('America/Mexico_City'),
-            ]);
-
-            if ($checadasUsuario['break'] == null) {
-
-                $checarHoraComida = $this->crearFechaCarbon($fechaActualClear[0], $fechaActualClear[1], $fechaActualClear[2], $horaDeComidaUsuarioClear[0], $horaDeComidaUsuarioClear[1], $horaDeComidaUsuarioClear[2]);
-
-                $checarHoraFinComida = $this->crearFechaCarbon($fechaActualClear[0], $fechaActualClear[1], $fechaActualClear[2], $horaDeComidaUsuarioClear[0], $horaDeComidaUsuarioClear[1], $horaDeComidaUsuarioClear[2])->addHours(1);
-
-                $insertarComida = Schedule::where("id", '=', $idUltimoRegistro)->update([
-                    'break' => $checarHoraComida,
-                    'end_break' => $checarHoraFinComida,
-                ]);
-
-                return 'guardado';
-            }
-
-            return 'guardado';
-        }
-
-        return 0;
-    }
->>>>>>> 07665353b4e065f135fcca55a62e6acdbfa7692f
 
     public function convertirHorasEnArray($hora)
     {
@@ -280,7 +338,6 @@ class TimeClock extends Controller
     public function horaDeSalidaUsuario()
     {
         $idUsuarioLogeado = $this->usuarioLogeado();
-<<<<<<< HEAD
         
         $horasEstablecidasDeUsuario= Usuario::where("id", '=', $idUsuarioLogeado)->get();
         $horaDeSalidaUsuario = $horasEstablecidasDeUsuario[0]['hora_salida'];
@@ -291,21 +348,56 @@ class TimeClock extends Controller
         $array1 = explode(' ' , $horaDeSalidaUsuario);
         $array2 = explode('-' , $array1[0]);
         $array3 = explode(':' , $array1[1]);
-=======
-
-        $horasEstablecidasDeUsuario = Usuario::where("id", '=', $idUsuarioLogeado)->get();
-        //$horasEstablecidasDeUsuarioArray = $horasEstablecidasDeUsuario->toArray(); 
-        $horaDeSalidaUsuario = $horasEstablecidasDeUsuario[0]['hora_salida'];
-
-        $array1 = explode(' ', $horaDeSalidaUsuario);
-        $array2 = explode('-', $array1[0]);
-        $array3 = explode(':', $array1[1]);
->>>>>>> 07665353b4e065f135fcca55a62e6acdbfa7692f
 
         $checarHoraSalida = $this->crearFechaCarbon($fechaActualAno[0], $fechaActualAno[1], $fechaActualAno[2], $array3[0], $array3[1], $array3[2]);
 
         return $checarHoraSalida;
         //
+    }
+
+    public function checadaEntradaUsuario()
+    {
+
+        $idUltimoRegistro = $this->ultimoRegistroSchedule();
+        $horaEntrada = $idUltimoRegistro['entry'];
+        $horaEntradaArray = explode(' ', $horaEntrada);
+        $fechaArray = explode('-' , $horaEntradaArray[0]);
+        $horaArray = explode(':' , $horaEntradaArray[1]);
+
+        $checarHoraEntrada = $this->crearFechaCarbon($fechaArray[0], $fechaArray[1], $fechaArray[2], $horaArray[0], $horaArray[1], $horaArray[2]);
+
+        return $checarHoraEntrada;
+        //
+    }
+
+    public function checadaComidaUsuario()
+    {
+
+        $idUltimoRegistro = $this->ultimoRegistroSchedule();
+        $horaComida = $idUltimoRegistro['break'];
+        $horaComidaArray = explode(' ', $horaComida);
+        $fechaArray = explode('-' , $horaComidaArray[0]);
+        $horaArray = explode(':' , $horaComidaArray[1]);
+
+        $checarComidaEntrada = $this->crearFechaCarbon($fechaArray[0], $fechaArray[1], $fechaArray[2], $horaArray[0], $horaArray[1], $horaArray[2]);
+
+        return $checarComidaEntrada;
+        //
+    } 
+
+    public function checadaRegresoComidaUsuario()
+    {
+
+        $idUltimoRegistro = $this->ultimoRegistroSchedule();
+        $horaRegresoComida = $idUltimoRegistro['end_break'];
+        $horaRegresoComidaArray = explode(' ', $horaRegresoComida);
+        $fechaArray = explode('-' , $horaRegresoComidaArray[0]);
+        $horaArray = explode(':' , $horaRegresoComidaArray[1]);
+
+        $checarRegresoComidaEntrada = $this->crearFechaCarbon($fechaArray[0], $fechaArray[1], $fechaArray[2], $horaArray[0], $horaArray[1], $horaArray[2]);
+
+        return $checarRegresoComidaEntrada;
+        
     }
 
     public function crearFechaCarbon($año, $mes, $dia, $hora, $minuto, $segundo)

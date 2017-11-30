@@ -93,12 +93,14 @@ a.text:hover {
             <table id="table" class="display datatable" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Nombre <i class="fa fa-user-o"></i></th> 
-                                <th>Entrada <i class="fa fa-share"></i></th> 
-                                <th>Comida <i class="fa fa-spoon"></i></th>
-                                <th>Fin Comida <i class="fa fa-spoon"></i></th>
-                                <th>Salida <i class="fa fa-reply"></i></th>
-                                <th>T. Extra <i class="fa fa-reply"></i></th>
+                                <th>Nombre <br><i class="fa fa-user-o"></i></th> 
+                                <th>Entrada <br><i class="fa fa-share"></i></th> 
+                                <th>Comida <br><i class="fa fa-spoon"></i></th>
+                                <th>Fin Comida <br><i class="fa fa-reply"></i> <i class="fa fa-spoon"></i></th>
+                                <th>Salida <br><i class="fa fa-reply"></i></th>
+                                <th>Extra <br><i class="fa fa-plus"></i></th>
+                                <th>Trabajado <br><i class="fa fa-check"></i></th>
+                                <th>Receso <br><i class="fa fa-spinner"></i></th>
                             </tr>
                         </thead>
                     </table>
@@ -133,7 +135,9 @@ $(document).ready(function() {
             {data: 'break'},
             {data: 'end_break'},
             {data: 'exit'},
-            {data: 'extra_time'}
+            {data: 'extra_time'},
+            {data: 'time_worked'},
+            {data: 'time_break'}
             
         ]
     });

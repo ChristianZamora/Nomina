@@ -31,6 +31,8 @@ Route::post('timeclock_comida', 'TimeClock@guardarComida')->name('checar_comida'
 
 Route::post('timeclock_regresoComida', 'TimeClock@guardarRegresoComida')->name('checar_regresoComida');
 
+Route::post('timeclock_statusComida', 'TimeClock@comprobarComida')->name('status_comida');
+
 Route::get('prueba', 'PermitsController@getPosts')->name('permits');
 
 Route::get('permits', 'PermitsController@index');

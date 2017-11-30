@@ -37,10 +37,10 @@ class SchedulesController extends Controller
 
         if ($rolUsuario == 1) { //Admin
 
-            $data = Datatables::of(DB::table('schedule_users')->join('users', 'users.id', '=', 'schedule_users.user_id')->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break', 'schedules.exit', 'schedules.end_break', 'schedules.extra_time')->get())->make(true);
+            $data = Datatables::of(DB::table('schedule_users')->join('users', 'users.id', '=', 'schedule_users.user_id')->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break', 'schedules.exit', 'schedules.end_break', 'schedules.extra_time', 'schedules.time_worked', 'time_break')->get())->make(true);
         } else {
 
-            $data = Datatables::of(DB::table('schedule_users')->join('users', 'users.id', '=', 'schedule_users.user_id')->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')->join('roles', 'roles.id', '=', 'users.role_id')->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break', 'schedules.exit', 'schedules.end_break', 'schedules.extra_time')->where('schedule_users.user_id', '=', $idUsuario)->get())->make(true);
+            $data = Datatables::of(DB::table('schedule_users')->join('users', 'users.id', '=', 'schedule_users.user_id')->join('schedules', 'schedules.id', '=', 'schedule_users.schedule_id')->join('roles', 'roles.id', '=', 'users.role_id')->select('users.name', 'users.role_id', 'schedules.entry', 'schedules.break', 'schedules.exit', 'schedules.end_break', 'schedules.extra_time', 'schedules.time_worked', 'time_break')->where('schedule_users.user_id', '=', $idUsuario)->get())->make(true);
         }
 
         return $data;
